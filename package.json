@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "start-prod": "sudo NODE_ENV=production PORT=80 forever ./bin/www"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "browser-sync": "^2.13.0",
     "connect-browser-sync": "^2.0.1",
+    "forever": "^0.15.2",
     "nodemon": "^1.9.2"
   }
 }
