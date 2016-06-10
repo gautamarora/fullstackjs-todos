@@ -1,0 +1,50 @@
+$font-stack: "Lucida Grande", Helvetica, Arial, sans-serif;
+$primary-link-color: #00B7FF;
+body {
+  padding: 50px;
+  font: 14px $font-stack;
+  a {
+    color: $primary-link-color;
+    text-decoration: none;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  ul {
+    list-style-type: none;
+    .checked {
+      text-decoration: line-through;
+    }
+  }
+  .todos {
+    margin-top: 20px
+  }
+  .footer div {
+    float: left;
+    padding: 0 10px;
+  }
+
+  .hide {
+    display: none;
+  }
+
+  .navbar-default {
+    background-image: none;
+    background-color: #e74c3c;
+    border-color: #c0392b;
+    .navbar-brand {
+      color: #ecf0f1;
+      position: absolute;
+      width: 100%;
+      left: 0;
+      text-align: center;
+      margin: auto;
+      font-size: 25px;
+      &:hover, &:focus {
+        cursor: default;
+        color: #ecf0f1;
+      }
+    }
+  }
+}

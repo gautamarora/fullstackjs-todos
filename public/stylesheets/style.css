@@ -1,0 +1,35 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; }
+  body a {
+    color: #00B7FF;
+    text-decoration: none;
+    cursor: pointer; }
+    body a:hover {
+      text-decoration: underline; }
+  body ul {
+    list-style-type: none; }
+    body ul .checked {
+      text-decoration: line-through; }
+  body .todos {
+    margin-top: 20px; }
+  body .footer div {
+    float: left;
+    padding: 0 10px; }
+  body .hide {
+    display: none; }
+  body .navbar-default {
+    background-image: none;
+    background-color: #e74c3c;
+    border-color: #c0392b; }
+    body .navbar-default .navbar-brand {
+      color: #ecf0f1;
+      position: absolute;
+      width: 100%;
+      left: 0;
+      text-align: center;
+      margin: auto;
+      font-size: 25px; }
+      body .navbar-default .navbar-brand:hover, body .navbar-default .navbar-brand:focus {
+        cursor: default;
+        color: #ecf0f1; }
