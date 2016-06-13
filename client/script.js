@@ -119,7 +119,9 @@ $(function() {
         updateTodoCount();
       });
     });
-    observer.observe(target, config);
+    if(target) {
+      observer.observe(target, config);
+    }
     updateTodoCount();
   };
   //setup mutation observer event handler
