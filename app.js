@@ -32,7 +32,7 @@ app.use (
 
 //bfy setup
 browserify.settings({
- transform: ['hbsfy']
+ transform: [['babelify', {"presets": ["react"]}]]
 });
 app.get('/javascripts/bundle.js', browserify('./client/script.js'));
 

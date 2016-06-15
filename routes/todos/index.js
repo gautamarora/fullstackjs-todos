@@ -12,4 +12,8 @@ router.get('/', function(req, res, next) {
   .error(console.error);
 });
 
+router.get('/react', function(req, res, next) {
+  res.render('todos-react', {title: 'Todos'});
+});
+
 module.exports = router;
