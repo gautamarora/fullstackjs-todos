@@ -3,11 +3,29 @@ var ReactDOM = require('react-dom');
 var $ = require('jquery');
 
 var TodoApp = React.createClass({
+  getInitialState: function() {
+    return {
+      data: []
+    }
+  },
+  componentDidMount: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
   render: function() {
     return(
       <div className="well todos">
         <TodoAdd />
-        <TodoList data={this.props.data} />
+        <TodoList data={this.state.data} />
         <div class="row">
           <TodoCounter />
           <TodoFilter />
@@ -92,13 +110,7 @@ var TodoClear = React.createClass({
   }
 });
 
-var data = [
-  {_id: 1, text: 'first todo', done: false},
-  {_id: 2, text: 'second todo', done: true},
-  {_id: 3, text: 'third todo', done: false},
-];
-
 ReactDOM.render(
-  <TodoApp data={data}/>,
+  <TodoApp url='/api/todos'/>,
   document.getElementById('app')
 );
