@@ -1,6 +1,6 @@
 var React = require('react');
 
-var HelloError = React.createClass({
+var Error = React.createClass({
   render: function() {
     return (
       <div>Error!</div>
@@ -8,4 +8,4 @@ var HelloError = React.createClass({
   }
 });
 
-module.exports = HelloError;
+module.exports = Error;
