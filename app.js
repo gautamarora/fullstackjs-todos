@@ -1,5 +1,5 @@
 var express = require('express');
-var exphbs  = require('express-handlebars');
+var expreact = require('express-react-views');
 var sassMiddleware = require('node-sass-middleware');
 var browserify = require('browserify-middleware');
 
@@ -17,8 +17,9 @@ var todosAPI = require('./routes/todos/api');
 var app = express();
 
 // view engine setup
-app.engine('hbs', exphbs({extname: '.hbs', defaultLayout: 'layout'}));
-app.set('view engine', 'hbs');
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jsx');
+app.engine('jsx', expreact.createEngine({beautify:true}));
 
 //sass setup
 app.use (
@@ -44,7 +45,7 @@ mongoose.connect('mongodb://localhost/todos');
 if (app.get('env') == 'development') {
   var browserSync = require('browser-sync');
   var config = {
-    files: ["public/**/*.{js,css}", "client/*.js", "sass/**/*.scss", "views/**/*.hbs"],
+    files: ["public/**/*.{js,css}", "client/*.js", "sass/**/*.scss", "views/**/*.jsx"],
     logLevel: 'debug',
     logSnippet: false,
     reloadDelay: 3000,
