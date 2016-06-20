@@ -15,7 +15,7 @@ var Layout = React.createClass({
           <link rel="stylesheet" href="../stylesheets/style.css" />
         </head>
         <body>
-          <Header />
+          <Header title={this.props.title}/>
           {this.props.children}
           <script src='/javascripts/bundle.js'></script>
         </body>

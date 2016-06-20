@@ -6,7 +6,7 @@ var Header = React.createClass({
       <nav className="navbar navbar-default navbar-fixed-top">
         <div className="container">
           <div className="navbar-header">
-            <a className="navbar-brand" href="#">Todos</a>
+            <a className="navbar-brand" href="#">{this.props.title}</a>
           </div>
         </div>
       </nav>
