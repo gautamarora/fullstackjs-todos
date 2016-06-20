@@ -55,7 +55,7 @@ var TodoList = React.createClass({
   render: function() {
       var todos = this.props.data.map(function(todo) {
         return (
-          <Todo key={todo._id}> {todo.text}</Todo>
+          <Todo key={todo._id} done={todo.done}> {todo.text}</Todo>
         );
       });
       return (
@@ -70,8 +70,8 @@ var Todo = React.createClass({
   render: function() {
     return(
       <li className="list-group-item">
-        <input type="checkbox" defaultChecked="true"/>
-        <span contenteditable="true" class="checked">{this.props.children}</span>
+        <input type="checkbox" defaultChecked={this.props.done}/>
+        <span contenteditable="true" className={this.props.done ? "checked" : ""}>{this.props.children}</span>
         <a className="pull-right"><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );
