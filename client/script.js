@@ -21,11 +21,49 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
+  addTodo: function(text, cb) {
+    $.ajax({
+      url: '/api/todos',
+      type: 'POST',
+      data: {
+        text: text
+      },
+      dataType: 'json',
+      success: function(data) {
+        var todo = data.todo;
+        var _data = this.state.data;
+        _data.push({_id: todo._id, text: todo.text, done: todo.done});
+        this.setState({data: _data});
+        cb();
+      }.bind(this)
+    });
+  },
+  updateTodo: function(id, data) {
+    $.ajax({
+      url: '/api/todos/'+id,
+      type: 'PUT',
+      data: data,
+      dataType: 'json',
+      success: function(todo) {
+        var _data = this.state.data;
+        $.each(_data, function() {
+          if(this._id === id) {
+            this.done = data.done ? data.done : this.done;
+            this.text = data.text ? data.text : this.text;
+          }
+        });
+        this.setState({data: _data});
+      }.bind(this)
+    });
+  },
+  deleteTodo: function(id) {
+    
+  },
   render: function() {
     return(
       <div className="well todos">
-        <TodoAdd />
-        <TodoList data={this.state.data} />
+        <TodoAdd addTodo={this.addTodo} />
+        <TodoList updateTodo={this.updateTodo} data={this.state.data} />
         <div class="row">
           <TodoCounter />
           <TodoFilter />
@@ -37,13 +75,31 @@ var TodoApp = React.createClass({
 });
 
 var TodoAdd = React.createClass({
+  onButtonClick: function(e) {
+    this.addTodo();
+  },
+  onTextFieldKeypress: function(e) {
+    var key = e.charCode;
+    if(key === 13 || key === 169) {
+      this.addTodo();
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  },
+  addTodo: function() {
+    var text = this.refs.addTodoText.value;
+    this.props.addTodo(text, function() {
+      this.refs.addTodoText.value = '';
+    }.bind(this));
+  },
   render: function() {
     return(
       <form action="#" method="post">
         <div className="form-group input-group">
-          <input id="add-todo-text" className="form-control" type="text" value="" placeholder="Add a Todo" />
+          <input ref="addTodoText" id="add-todo-text" className="form-control" type="text" defaultValue="" placeholder="Add a Todo" onKeyPress={this.onTextFieldKeypress} />
           <span className="input-group-btn">
-            <input className="btn btn-default" type="button" value="add" />
+            <input className="btn btn-default" type="button" value="add" onClick={this.onButtonClick} />
           </span>
         </div>
       </form>
@@ -53,9 +109,10 @@ var TodoAdd = React.createClass({
 
 var TodoList = React.createClass({
   render: function() {
+      var self = this;
       var todos = this.props.data.map(function(todo) {
         return (
-          <Todo key={todo._id} done={todo.done}> {todo.text}</Todo>
+          <Todo updateTodo={self.props.updateTodo} key={todo._id} id={todo._id} done={todo.done} editing={todo.editing}> {todo.text}</Todo>
         );
       });
       return (
@@ -67,11 +124,58 @@ var TodoList = React.createClass({
 });
 
 var Todo = React.createClass({
+  onCheckboxClick: function(e) {
+    var id = this.props.id,
+        checked = !this.props.done,
+        data = {done: checked};
+    this.updateTodo(id, data);
+  },
+  updateTodo: function(id, data) {
+    this.props.updateTodo(id, data);
+  },
+  onTextFieldKeydown: function(e) {
+    var key = e.charCode,
+        target = e.target,
+        id = this.props.id,
+        text = this.props.text,
+        data = { text: text };
+        console.log("children", this.props.children);
+    //  $this.addClass("editing");
+    //  if(key === 27) { //escape key
+    //    $this.removeClass("editing");
+    //    document.execCommand('undo');
+    //    target.blur();
+    //  } else if(key === 13) { //enter key
+    //    updateTodo(id, data, function(d) {
+    //      $this.removeClass("editing");
+    //      target.blur();
+    //    });
+    //    e.preventDefault();
+    //  }
+     console.log(key, id, text);
+     if(key === 27) {
+       this.updateTodoEditingDismiss();
+     } else if(key === 13) {
+       this.updateTodoEditingSave(id, data);
+     } else {
+       this.updateTodoEditingStart();
+     }
+  },
+  updateTodoEditingStart: function() {
+    console.log("start editing");
+  },
+  updateTodoEditingDismiss: function() {
+    console.log("dismiss editing");
+  },
+  updateTodoEditingSave: function(id, data) {
+    console.log("save editing");
+    // this.props.updateTodo(id, data);
+  },
   render: function() {
     return(
-      <li className="list-group-item">
-        <input type="checkbox" defaultChecked={this.props.done}/>
-        <span contenteditable="true" className={this.props.done ? "checked" : ""}>{this.props.children}</span>
+      <li id={this.props.id} className="list-group-item">
+        <input type="checkbox" defaultChecked={this.props.done} onClick={this.onCheckboxClick}/>
+        <span contentEditable className={this.props.done ? "checked editing" : ""} onKeyDown={this.onTextFieldKeydown}>{this.props.children}</span>
         <a className="pull-right"><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );
