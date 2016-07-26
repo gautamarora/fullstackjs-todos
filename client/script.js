@@ -56,7 +56,9 @@ $(function() {
     $input = $this[0],
     $li = $this.parent(),
     id = $li.attr('id');
-    deleteTodo(id, deleteTodoLi($li));
+    deleteTodo(id, function(e){
+                    deleteTodoLi($li);
+    });
   });
   
   //ajax to add todo
