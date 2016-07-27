@@ -56,7 +56,7 @@ $(function() {
     $input = $this[0],
     $li = $this.parent(),
     id = $li.attr('id');
-    deleteTodo(id, function(e){
+    deleteTodo(id, function(){
                     deleteTodoLi($li);
     });
   });
@@ -152,7 +152,11 @@ $(function() {
     for (var i = 0; i < $doneLi.length; i++) {
       var $li = $($doneLi[i]); //you get a li out, and still need to convert into $li
       var id = $li.attr('id');
-      deleteTodo(id, deleteTodoLi($li));
+      (function($li){
+        deleteTodo(id, function(){
+                        deleteTodoLi($li);
+        });
+      })($li);
     }
   });
   
