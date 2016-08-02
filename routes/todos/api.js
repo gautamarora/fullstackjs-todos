@@ -20,7 +20,7 @@ router.route('/')
     .then(function(todo) {
       res.json({todo: todo});
     })
-    .catch(function(e){
+    .catch(function(err){
       res.status(400).json({message: err.message});
     });
   });
@@ -45,7 +45,7 @@ router.route('/:id')
     .then(function(updateLog) {
       return res.json({updated: true});
     })
-    .catch(function(e){
+    .catch(function(err){
       res.status(400).json({message: err.message});
     });
   })
@@ -54,7 +54,7 @@ router.route('/:id')
     .then(function(deletedTodo) {
       return res.json({deleted: true});
     })
-    .catch(function(e) {
+    .catch(function(err) {
       res.status(400).json({message: err.message});
     });
   });
