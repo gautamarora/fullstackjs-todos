@@ -6,11 +6,13 @@ var KEY_ESCAPE = 27;
 
 $(function() {
   var app = (function() {
-    var $todoTextField = $('#add-todo-text');
-    var $todoButton = $(':button');
-    var $todoList = $('ul');
-    var $filter = $('.filter');
-    var $clear = $('.clear');
+    
+    var $todoTextField = $('#add-todo-text'),
+        $todoButton = $(':button'),
+        $todoList = $('ul'),
+        $filter = $('.filter'),
+        $clear = $('.clear'),
+        $count = $('.count');
     
     var init = function() {
       registerEvents();
@@ -68,13 +70,14 @@ $(function() {
     };
     
     //Update Todos
-    
-    //get todo data from dom using a child dom element reference
+    var getTodoLi = function(_this) {
+      return $(_this).parent('li');
+    }
     var getTodoData = function(_this) {
-      var $this = $(_this),
-          id = $this.parent('li').attr('id'),
-          text = $this.parent('li').children('span').text(),
-          checked = $this.parent('li').children('input').is(':checked');
+      var $li = getTodoLi(_this),
+          id = $li.attr('id'),
+          text = $li.children('span').text(),
+          checked = $li.children('input').is(':checked');
       return {
         id: id,
         text: text,
@@ -82,8 +85,7 @@ $(function() {
       };
     }
     var updateTodoLiAsChecked = function(_this) {
-      var $this = $(_this);
-      $this.parent('li').toggleClass('checked');
+      getTodoLi(_this).toggleClass('checked');
     }
     var updateTodoStatus = function() {
       var todo = getTodoData(this);
@@ -124,8 +126,7 @@ $(function() {
     
     //Delete Todos
     var deleteTodoLi = function(_this) {
-      var $this = $(_this);
-      $this.parent('li').remove();
+      getTodoLi(_this).remove();
     }
     var deleteTodo = function() {
       var todo = getTodoData(this);
@@ -151,28 +152,34 @@ $(function() {
     //Footer
     //Count
     var updateTodoCount = function() {
-      $('.count').text($todoList.children().length);
+      $count.text($todoList.children().length);
     }
     
     //Filter
+    var getTodoLiList = function() {
+      return $('li');
+    }
+    var getTodoLiCheckedList = function() {
+      return $('li.checked');
+    }
     var showAll = function() {
-      $('li').removeClass('hide');
+      getTodoLiList().removeClass('hide');
     }
     var showNone = function() {
-      $('li').addClass('hide');
+      getTodoLiList().addClass('hide');
     }
     var showNotDone = function() {
       showAll();
-      $('li.checked').addClass('hide');
+      getTodoLiCheckedList().addClass('hide');
     }
     var showDone = function() {
-      $('li').addClass('hide');
-      $('li.checked').removeClass('hide');
+      getTodoLiList().addClass('hide');
+      getTodoLiCheckedList().removeClass('hide');
     }
     
     //Clear
     var deleteTodosDone = function() {
-      var $done = $('li.checked span'),
+      var $done = getTodoLiCheckedList().find('span'),
           todo;
       for (var i = 0; i < $done.length; i++) {
         todo = getTodoData($done[i]);
