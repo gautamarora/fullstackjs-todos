@@ -42,23 +42,21 @@ $(function() {
       $todoList.append(todoHtml);
     }
     var addTodo = function() {
-      addTodoAjax();
+      var text = getTodoText();
+      addTodoAjax({text: text});
     }
-    var addTodoIfKeypressEnter = function(e) {
-     var key = e.keyCode;
+    var addTodoIfKeypressEnter = function(event) {
+     var key = event.keyCode;
      if( key == KEY_ENTER) {
-       addTodoAjax();
-       e.preventDefault();
+       addTodo();
+       event.preventDefault();
      }
     };
-    var addTodoAjax = function() {
-      var text = getTodoText();
+    var addTodoAjax = function(data) {
       $.ajax({
         url: '/api/todos',
         type: 'POST',
-        data: {
-          text: text
-        },
+        data: data,
         dataType: 'json',
         success: function(data) {
           var todo = data.todo;
@@ -93,11 +91,11 @@ $(function() {
         updateTodoLiAsChecked(this);
       }.bind(this));
     }
-    var updateTodoText = function(e) {
+    var updateTodoText = function(event) {
       var todo = getTodoData(this),
           $this = $(this),
-          key = e.keyCode,
-          target = e.target;
+          key = event.keyCode,
+          target = event.target;
       $this.addClass('editing');
       if(key === KEY_ESCAPE) {
        $this.removeClass('editing');
@@ -108,10 +106,9 @@ $(function() {
          $this.removeClass('editing');
          target.blur();
        });
-       e.preventDefault();
+       event.preventDefault();
       }
     }
-    
     var updateTodoAjax = function(id, data, cb) {
       $.ajax({
         url: '/api/todos/'+id,
@@ -139,9 +136,6 @@ $(function() {
       $.ajax({
         url: '/api/todos/' + id,
         type: 'DELETE',
-        data: {
-          id: id
-        },
         dataType: 'json',
         success: function(data) {
           cb(data);
@@ -173,7 +167,7 @@ $(function() {
       getTodoLiCheckedList().addClass('hide');
     }
     var showDone = function() {
-      getTodoLiList().addClass('hide');
+      showNone();
       getTodoLiCheckedList().removeClass('hide');
     }
     
