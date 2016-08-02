@@ -7,34 +7,33 @@ router.route('/')
   .get(function(req, res, next) {
     Todo.findAsync({},null,{sort: {"_id":1}})
     .then(function(todos) {
-      res.json(todos);
+      res.json({todos: todos});
     })
-    .catch(next)
-    .error(console.error);
+    .catch(function(err){
+      res.status(400).json({message: err.message});
+    });
   })
   .post(function(req, res, next) {
     var todo = new Todo();
     todo.text = req.body.text;
     todo.saveAsync()
     .then(function(todo) {
-      console.log("success");
-      res.json({'status': 'success', 'todo': todo});
+      res.json({todo: todo});
     })
-    .catch(function(e) {
-      console.log("fail");
-      res.json({'status': 'error', 'error': e});
-    })
-    .error(console.error);
+    .catch(function(e){
+      res.status(400).json({message: err.message});
+    });
   });
 
 router.route('/:id')
   .get(function(req, res, next) {
     Todo.findOneAsync({_id: req.params.id}, {text: 1, done: 1})
     .then(function(todo) {
-      res.json(todo);
+      res.json({todo: todo});
     })
-    .catch(next)
-    .error(console.error);
+    .catch(function(e){
+      res.status(400).json({message: err.message});
+    });
   })
   .put(function(req, res, next) {
     var todo = {};
@@ -43,20 +42,20 @@ router.route('/:id')
       todo[prop] = req.body[prop];
     }
     Todo.updateAsync({_id: req.params.id}, todo)
-    .then(function(updatedTodo) {
-      return res.json({'status': 'success', 'todo': updatedTodo});
+    .then(function(updateLog) {
+      return res.json({updated: true});
     })
     .catch(function(e){
-      return res.status(400).json({'status': 'fail', 'error': e});
+      res.status(400).json({message: err.message});
     });
   })
   .delete(function(req, res, next) {
     Todo.findByIdAndRemoveAsync(req.params.id)
     .then(function(deletedTodo) {
-      res.json({'status': 'success', 'todo': deletedTodo});
+      return res.json({deleted: true});
     })
     .catch(function(e) {
-      res.status(400).json({'status': 'fail', 'error': e});
+      res.status(400).json({message: err.message});
     });
   });
 

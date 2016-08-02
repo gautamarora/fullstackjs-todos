@@ -8,8 +8,7 @@ router.get('/', function(req, res, next) {
   .then(function(todos) {
     res.render('todos', {title: 'Todos', todos: todos});
   })
-  .catch(next)
-  .error(console.error);
+  .catch(next);
 });
 
 module.exports = router;
