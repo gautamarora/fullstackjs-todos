@@ -5825,7 +5825,7 @@ body {
       text-decoration: underline; }
   body ul {
     list-style-type: none; }
-    body ul .checked {
+    body ul .checked span {
       text-decoration: line-through; }
   body .todos {
     margin-top: 20px; }
