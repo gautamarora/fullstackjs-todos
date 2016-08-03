@@ -1,163 +1,197 @@
 var $ = require('jquery');
-var todoTemplate = require("../views/partials/todo.hbs");
+var todoTemplate = require('../views/partials/todo.hbs');
+
+var KEY_ENTER = 13;
+var KEY_ESCAPE = 27;
+
 $(function() {
-  //update status checkbox event handler
-  $("ul").on('change', 'li :checkbox', function() {
-    var $this = $(this),
-        $input = $this[0],
-        $li = $this.parent(),
-        id = $li.attr('id'),
-        checked = $input.checked,
-        data = { done: checked };
-    updateTodo(id, data, function(d) {
-      $this.next().toggleClass("checked");
-    });
-  });
-  
-  //add todo event handler
-  $(":button").on('click', addTodo);
-  $(":text").on('keypress',function(e) {
-   var key = e.keyCode;
-   if( key == 13 || key == 169) {
-     addTodo();
-     e.preventDefault();
-     e.stopPropagation();
-     return false;
-   }
-  });
-  
-  //update text field event handler
-  $('ul').on('keydown', 'li span', function(e) {
-   var $this = $(this),
-       $span = $this[0],
-       $li = $this.parent(),
-       id = $li.attr('id'),
-       key = e.keyCode,
-       target = e.target,
-       text = $span.innerHTML,
-       data = { text: text};
-   $this.addClass("editing");
-   if(key === 27) { //escape key
-     $this.removeClass("editing");
-     document.execCommand('undo');
-     target.blur();
-   } else if(key === 13) { //enter key
-     updateTodo(id, data, function(d) {
-       $this.removeClass("editing");
-       target.blur();
-     });
-     e.preventDefault();
-   }
-  });
-
-  // delete link click event handler
-  $("ul").on('click', 'li a', function() {
-    var $this = $(this),
-    $input = $this[0],
-    $li = $this.parent(),
-    id = $li.attr('id');
-    deleteTodo(id, function(){
-                    deleteTodoLi($li);
-    });
-  });
-  
-  //ajax to add todo
-  var addTodo = function() {
-    var text = $('#add-todo-text').val();
-    console.log(text);
-    $.ajax({
-      url: '/api/todos',
-      type: 'POST',
-      data: {
-        text: text
-      },
-      dataType: 'json',
-      success: function(data) {
-        var todo = data.todo;
-        var newLiHtml = todoTemplate(todo);
-        $('form + ul').append(newLiHtml);
-        $('#add-todo-text').val('');
-      }
-    });
-  };
-  
-  //ajax to update todo
-  var updateTodo = function(id, data, cb) {
-    $.ajax({
-      url: '/api/todos/'+id,
-      type: 'PUT',
-      data: data,
-      dataType: 'json',
-      success: function(data) {
-        cb();
-      }
-    });
-  };
-  
-  //ajax to delete todo
-  var deleteTodo = function(id, cb) {
-    $.ajax({
-      url: '/api/todos/'+id,
-      type: 'DELETE',
-      data: {
-        id: id
-      },
-      dataType: 'json',
-      success: function(data) {
-        cb();
-      }
-    });
-  };
-  var deleteTodoLi = function($li) {
-    $li.remove();
-  };
-  
-  //setup mutation observer
-  var initTodoObserver = function () {
-    var target = $('ul')[0];
-    var config = { attributes: true, childList: true, characterData: true };
-    var observer = new MutationObserver(function(mutationRecords) {
-      $.each(mutationRecords, function(index, mutationRecord) {
-        updateTodoCount();
+  var app = (function() {
+    
+    var $todoTextField = $('#add-todo-text'),
+        $todoButton = $(':button'),
+        $todoList = $('ul'),
+        $filter = $('.filter'),
+        $clear = $('.clear'),
+        $count = $('.count');
+    
+    var init = function() {
+      registerEvents();
+    };
+    
+    var registerEvents = function() {
+      $todoButton.on('click', addTodo);
+      $todoTextField.on('keypress', addTodoIfKeypressEnter);
+      $todoList.on('change', 'li input:checkbox', updateTodoStatus);
+      $todoList.on('keydown', 'li span', updateTodoText);
+      $todoList.on('click', 'li a', deleteTodo);
+      $filter.on('click', '.show-all', showAll);
+      $filter.on('click', '.show-not-done', showNotDone);
+      $filter.on('click', '.show-done', showDone);
+      $clear.on('click', deleteTodosDone);
+    };
+    
+    // Add Todos
+    var getTodoText = function() {
+      return $todoTextField.val();
+    };
+    var clearTodoText = function() {
+      $todoTextField.val('');
+    }
+    var appendTodoLi = function(todo) {
+      var todoHtml = todoTemplate(todo);
+      $todoList.append(todoHtml);
+    }
+    var addTodo = function() {
+      var text = getTodoText();
+      addTodoAjax({text: text});
+    }
+    var addTodoIfKeypressEnter = function(event) {
+     var key = event.keyCode;
+     if( key == KEY_ENTER) {
+       addTodo();
+       event.preventDefault();
+     }
+    };
+    var addTodoAjax = function(data) {
+      $.ajax({
+        url: '/api/todos',
+        type: 'POST',
+        data: data,
+        dataType: 'json',
+        success: function(data) {
+          var todo = data.todo;
+          appendTodoLi(todo);
+          clearTodoText();
+          updateTodoCount();
+        }
       });
-    });
-    if(target) {
-      observer.observe(target, config);
+    };
+    
+    //Update Todos
+    var getTodoLi = function(_this) {
+      return $(_this).parent('li');
     }
-    updateTodoCount();
-  };
-  //setup mutation observer event handler
-  var updateTodoCount = function () {
-    $(".count").text($("li").length);
-  };
-  //kick off mutation observing
-  initTodoObserver();
-
-  //setup filters
-  $('.filter').on('click', '.show-all', function() {
-    $('.hide').removeClass('hide');
-  });
-  $('.filter').on('click', '.show-not-done', function() {
-    $('.hide').removeClass('hide');
-    $('.checked').closest('li').addClass('hide');
-  });
-  $('.filter').on('click', '.show-done', function() {
-    $('li').addClass('hide');
-    $('.checked').closest('li').removeClass('hide');
-  });
+    var getTodoData = function(_this) {
+      var $li = getTodoLi(_this),
+          id = $li.attr('id'),
+          text = $li.children('span').text(),
+          checked = $li.children('input').is(':checked');
+      return {
+        id: id,
+        text: text,
+        checked: checked
+      };
+    }
+    var updateTodoLiAsChecked = function(_this) {
+      getTodoLi(_this).toggleClass('checked');
+    }
+    var updateTodoStatus = function() {
+      var todo = getTodoData(this);
+      updateTodoAjax(todo.id, {done: todo.checked}, function(data) {
+        updateTodoLiAsChecked(this);
+      }.bind(this));
+    }
+    var updateTodoText = function(event) {
+      var todo = getTodoData(this),
+          $this = $(this),
+          key = event.keyCode,
+          target = event.target;
+      $this.addClass('editing');
+      if(key === KEY_ESCAPE) {
+       $this.removeClass('editing');
+       document.execCommand('undo');
+       target.blur();
+     } else if(key === KEY_ENTER) {
+       updateTodoAjax(todo.id, {text: todo.text}, function(data) {
+         $this.removeClass('editing');
+         target.blur();
+       });
+       event.preventDefault();
+      }
+    }
+    var updateTodoAjax = function(id, data, cb) {
+      $.ajax({
+        url: '/api/todos/'+id,
+        type: 'PUT',
+        data: data,
+        dataType: 'json',
+        success: function(data) {
+          cb(data);
+        }
+      });
+    };
+    
+    //Delete Todos
+    var deleteTodoLi = function(_this) {
+      getTodoLi(_this).remove();
+    }
+    var deleteTodo = function() {
+      var todo = getTodoData(this);
+      deleteTodoAjax(todo.id, function(data){
+                      deleteTodoLi(this);
+                      updateTodoCount();
+      }.bind(this));
+    };
+    var deleteTodoAjax = function(id, cb) {
+      $.ajax({
+        url: '/api/todos/' + id,
+        type: 'DELETE',
+        dataType: 'json',
+        success: function(data) {
+          cb(data);
+        }
+      });
+    };
+    
+    //Footer
+    //Count
+    var updateTodoCount = function() {
+      $count.text($todoList.children().length);
+    }
+    
+    //Filter
+    var getTodoLiList = function() {
+      return $('li');
+    }
+    var getTodoLiCheckedList = function() {
+      return $('li.checked');
+    }
+    var showAll = function() {
+      getTodoLiList().removeClass('hide');
+    }
+    var showNone = function() {
+      getTodoLiList().addClass('hide');
+    }
+    var showNotDone = function() {
+      showAll();
+      getTodoLiCheckedList().addClass('hide');
+    }
+    var showDone = function() {
+      showNone();
+      getTodoLiCheckedList().removeClass('hide');
+    }
+    
+    //Clear
+    var deleteTodosDone = function() {
+      var $done = getTodoLiCheckedList().find('span'),
+          todo;
+      for (var i = 0; i < $done.length; i++) {
+        todo = getTodoData($done[i]);
+        (function($done){
+          deleteTodoAjax(todo.id, function(){
+                          deleteTodoLi($done);
+                          updateTodoCount();
+          });
+        })($done[i]);
+      }
+    };    
+    
+    return {
+      init: init
+    };
+    
+  })();
   
-  //batch delete todos on clear link
-  $(".clear").on("click", function() {
-    var $doneLi = $(".checked").closest("li");
-    for (var i = 0; i < $doneLi.length; i++) {
-      var $li = $($doneLi[i]); //you get a li out, and still need to convert into $li
-      var id = $li.attr('id');
-      (function($li){
-        deleteTodo(id, function(){
-                        deleteTodoLi($li);
-        });
-      })($li);
-    }
-  });
+  app.init();
   
 });
