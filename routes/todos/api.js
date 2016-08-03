@@ -9,9 +9,7 @@ router.route('/')
     .then(function(todos) {
       res.json({todos: todos});
     })
-    .catch(function(err){
-      res.status(400).json({message: err.message});
-    });
+    .catch(next);
   })
   .post(function(req, res, next) {
     var todo = new Todo();
@@ -20,9 +18,7 @@ router.route('/')
     .then(function(todo) {
       res.json({todo: todo});
     })
-    .catch(function(err){
-      res.status(400).json({message: err.message});
-    });
+    .catch(next);
   });
 
 router.route('/:id')
@@ -31,9 +27,7 @@ router.route('/:id')
     .then(function(todo) {
       res.json({todo: todo});
     })
-    .catch(function(e){
-      res.status(400).json({message: err.message});
-    });
+    .catch(next);
   })
   .put(function(req, res, next) {
     var todo = {};
@@ -45,18 +39,14 @@ router.route('/:id')
     .then(function(updateLog) {
       return res.json({updated: true});
     })
-    .catch(function(err){
-      res.status(400).json({message: err.message});
-    });
+    .catch(next);
   })
   .delete(function(req, res, next) {
     Todo.findByIdAndRemoveAsync(req.params.id)
     .then(function(deletedTodo) {
       return res.json({deleted: true});
     })
-    .catch(function(err) {
-      res.status(400).json({message: err.message});
-    });
+    .catch(next);
   });
 
 module.exports = router;
