@@ -17,6 +17,7 @@ $(function() {
     var init = function() {
       registerEvents();
     };
+    
     var registerEvents = function() {
       $todoButton.on('click', addTodo);
       $todoTextField.on('keypress', addTodoIfKeypressEnter);
@@ -27,7 +28,6 @@ $(function() {
       $filter.on('click', '.show-not-done', showNotDone);
       $filter.on('click', '.show-done', showDone);
       $clear.on('click', deleteTodosDone);
-      
     };
     
     // Add Todos
@@ -189,6 +189,9 @@ $(function() {
     return {
       init: init
     };
+    
   })();
+  
   app.init();
+  
 });

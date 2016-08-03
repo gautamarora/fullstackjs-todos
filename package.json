@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
-    "start-prod": "sudo NODE_ENV=production PORT=80 ./node_modules/forever/bin/forever ./bin/www"
+    "start": "npm run dev",
+    "dev": "nodemon ./bin/www",
+    "prod": "sudo NODE_ENV=production PORT=80 forever ./bin/www"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
