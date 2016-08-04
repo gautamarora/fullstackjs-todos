@@ -8,7 +8,7 @@ $(function() {
   var app = (function() {
     
     var $todoTextField = $('#add-todo-text'),
-        $todoButton = $(':button'),
+        $todoButton = $('#add-todo-text-btn'),
         $todoList = $('ul'),
         $filter = $('.filter'),
         $clear = $('.clear'),

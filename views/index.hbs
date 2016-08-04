@@ -1,5 +1,12 @@
 <div class="container">
   <div class="well todos">
     Welcome to the {{title}} app!
+    {{#if user}}
+      You are currently logged in as {{user.username}}
+      <a href="/logout">Logout</a>
+    {{else}}
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    {{/if}}
   </div>
 </div>
