@@ -32,12 +32,6 @@ router.get('/login', function(req, res) {
 });
 
 router.post('/login', passport.authenticate('local'), function(req, res) {
-  // passport.authenticate('local')(req, res, function(err, user) {
-  //   if (err) {
-  //     console.log(err);
-  //     return res.render('login' , { error : err.message });
-  //   }
-  // })
   res.redirect('/');
 });
 
@@ -48,13 +42,3 @@ router.get('/logout', function(req, res) {
 
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
