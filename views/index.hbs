@@ -1,12 +1,27 @@
 <div class="container">
   <div class="well todos">
-    Welcome to the {{title}} app!
-    {{#if user}}
-      You are currently logged in as {{user.username}}
-      <a href="/logout">Logout</a>
-    {{else}}
-      <a href="/login">Login</a>
-      <a href="/register">Register</a>
-    {{/if}}
+    <h4>
+      {{#if user}}
+        <h4>Welcome {{user.username}}!</h4>
+      {{else}}
+        <h4>Welcome to the {{title}} app!</h4>
+      {{/if}}
+    <div>
+      {{#if user}}
+        <a href="/todos">
+          <button class="btn btn-md btn-success" type="submit">Todos</button>
+        </a>
+        <a href="/logout">
+          <button class="btn btn-md btn-danger" type="submit">Log Out</button>
+        </a>
+      {{else}}
+        <a href="/login">
+          <button class="btn btn-md btn-success" type="submit">Log In</button>
+        </a>
+        <a href="/register">
+          <button class="btn btn-md btn-primary" type="submit">Register</button>
+        </a>
+      {{/if}}
+    </div>
   </div>
 </div>

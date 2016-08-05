@@ -5847,7 +5847,6 @@ body {
       margin: auto;
       font-size: 25px; }
       body .navbar-default .navbar-brand:hover, body .navbar-default .navbar-brand:focus {
-        cursor: default;
         color: #ecf0f1; }
   body .form-signin {
     max-width: 330px;
