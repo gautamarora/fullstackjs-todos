@@ -48,6 +48,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 //mongo setup
+mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/todos');
 
 //browser sync setup

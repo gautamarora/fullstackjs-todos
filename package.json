@@ -8,7 +8,6 @@
     "prod": "sudo NODE_ENV=production PORT=80 forever ./bin/www"
   },
   "dependencies": {
-    "bluebird": "^3.4.0",
     "body-parser": "~1.8.1",
     "bootstrap-sass": "^3.3.7",
     "browserify-middleware": "^7.0.0",
