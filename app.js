@@ -41,7 +41,6 @@ browserify.settings({
 app.get('/javascripts/bundle.js', browserify('./client/script.js'));
 
 //mongo setup
-mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/todos');
 
 //passport setup
