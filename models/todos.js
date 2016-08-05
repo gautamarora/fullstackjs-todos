@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.SchemaTypes.ObjectId;
 
+mongoose.Promise = global.Promise;
+
 var TodoSchema = new Schema({
   user : { ref: 'User', type: Schema.ObjectId },
   text: {type: 'String', required: true},
