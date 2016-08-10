@@ -41,7 +41,8 @@ browserify.settings({
 app.get('/javascripts/bundle.js', browserify('./client/script.js'));
 
 //mongo setup
-mongoose.connect('mongodb://localhost/todos');
+var dbConnectionString = process.env.MONGODB_URI || 'mongodb://localhost';
+mongoose.connect(dbConnectionString + '/todos');
 
 //passport setup
 var User = require('./models/users');
