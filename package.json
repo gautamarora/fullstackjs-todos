@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "npm run dev",
+    "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
     "prod": "sudo NODE_ENV=production PORT=80 forever ./bin/www"
   },
