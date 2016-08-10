@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var Promise = require('bluebird');
-Promise.promisifyAll(mongoose);
+
+mongoose.Promise = global.Promise;
 
 var passportLocalMongoose = require('passport-local-mongoose');
 
