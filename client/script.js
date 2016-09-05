@@ -57,14 +57,24 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
-  deleteTodo: function(id) {
-    
+  deleteTodo: function(id, cb) {
+    $.ajax({
+      url: '/api/todos/'+id,
+      type: 'DELETE',
+      success: function(todo) {
+        var _data = $.grep(this.state.data, function(d) {
+          return d._id !== id;
+        })
+        this.setState({data: _data});
+        cb();
+      }.bind(this)
+    })
   },
   render: function() {
     return(
       <div className="well todos">
         <TodoAdd addTodo={this.addTodo} />
-        <TodoList updateTodo={this.updateTodo} data={this.state.data} />
+        <TodoList updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} data={this.state.data} />
         <div className="row">
           <TodoCounter />
           <TodoFilter />
@@ -113,7 +123,7 @@ var TodoList = React.createClass({
       var self = this;
       var todos = this.props.data.map(function(todo) {
         return (
-          <Todo updateTodo={self.props.updateTodo} key={todo._id} id={todo._id} done={todo.done} editing={todo.editing}>{todo.text}</Todo>
+          <Todo updateTodo={self.props.updateTodo} deleteTodo={self.props.deleteTodo} key={todo._id} id={todo._id} done={todo.done}>{todo.text}</Todo>
         );
       });
       return (
@@ -129,9 +139,6 @@ var Todo = React.createClass({
     var id = this.props.id,
         checked = !this.props.done,
         data = {done: checked};
-    this.updateTodo(id, data);
-  },
-  updateTodo: function(id, data) {
     this.props.updateTodo(id, data);
   },
   onTextFieldKeyDown: function(e) {
@@ -150,12 +157,16 @@ var Todo = React.createClass({
       e.preventDefault();
     }
   },
+  onDeleteClick: function(e) {
+    var id = this.props.id;
+    this.props.deleteTodo(id);
+  },
   render: function() {
     return(
       <li id={this.props.id} className="list-group-item">
         <input type="checkbox" defaultChecked={this.props.done} onClick={this.onCheckboxClick}/>
         <span ref={"todoText-"+this.props.id} contentEditable={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
-        <a className="pull-right"><small><i className="glyphicon glyphicon-trash"></i></small></a>
+        <a className="pull-right" onClick={this.onDeleteClick}><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );
   }
