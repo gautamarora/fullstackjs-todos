@@ -38,7 +38,7 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
-  updateTodo: function(id, data) {
+  updateTodo: function(id, data, cb) {
     $.ajax({
       url: '/api/todos/'+id,
       type: 'PUT',
@@ -53,6 +53,7 @@ var TodoApp = React.createClass({
           }
         });
         this.setState({data: _data});
+        cb();
       }.bind(this)
     });
   },
@@ -64,7 +65,7 @@ var TodoApp = React.createClass({
       <div className="well todos">
         <TodoAdd addTodo={this.addTodo} />
         <TodoList updateTodo={this.updateTodo} data={this.state.data} />
-        <div class="row">
+        <div className="row">
           <TodoCounter />
           <TodoFilter />
           <TodoClear />
@@ -112,7 +113,7 @@ var TodoList = React.createClass({
       var self = this;
       var todos = this.props.data.map(function(todo) {
         return (
-          <Todo updateTodo={self.props.updateTodo} key={todo._id} id={todo._id} done={todo.done} editing={todo.editing}> {todo.text}</Todo>
+          <Todo updateTodo={self.props.updateTodo} key={todo._id} id={todo._id} done={todo.done} editing={todo.editing}>{todo.text}</Todo>
         );
       });
       return (
@@ -133,49 +134,27 @@ var Todo = React.createClass({
   updateTodo: function(id, data) {
     this.props.updateTodo(id, data);
   },
-  onTextFieldKeydown: function(e) {
-    var key = e.charCode,
+  onTextFieldKeyDown: function(e) {
+    var key = e.keyCode, //note: For keydown (when detecting escape), use key code. For keypress, use char code.
         target = e.target,
         id = this.props.id,
-        text = this.props.text,
+        text = this.refs["todoText-"+id].innerHTML, //note: for text fields, use innerHTML. For input text fields, use value.
         data = { text: text };
-        console.log("children", this.props.children);
-    //  $this.addClass("editing");
-    //  if(key === 27) { //escape key
-    //    $this.removeClass("editing");
-    //    document.execCommand('undo');
-    //    target.blur();
-    //  } else if(key === 13) { //enter key
-    //    updateTodo(id, data, function(d) {
-    //      $this.removeClass("editing");
-    //      target.blur();
-    //    });
-    //    e.preventDefault();
-    //  }
-     console.log(key, id, text);
-     if(key === 27) {
-       this.updateTodoEditingDismiss();
-     } else if(key === 13) {
-       this.updateTodoEditingSave(id, data);
-     } else {
-       this.updateTodoEditingStart();
-     }
-  },
-  updateTodoEditingStart: function() {
-    console.log("start editing");
-  },
-  updateTodoEditingDismiss: function() {
-    console.log("dismiss editing");
-  },
-  updateTodoEditingSave: function(id, data) {
-    console.log("save editing");
-    // this.props.updateTodo(id, data);
+    if(key === 27) {
+      document.execCommand('undo');
+      target.blur();
+    } else if(key === 13) {
+      this.props.updateTodo(id, data, function() {
+        target.blur();
+      });
+      e.preventDefault();
+    }
   },
   render: function() {
     return(
       <li id={this.props.id} className="list-group-item">
         <input type="checkbox" defaultChecked={this.props.done} onClick={this.onCheckboxClick}/>
-        <span contentEditable className={this.props.done ? "checked editing" : ""} onKeyDown={this.onTextFieldKeydown}>{this.props.children}</span>
+        <span ref={"todoText-"+this.props.id} contentEditable={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
         <a className="pull-right"><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );
@@ -207,8 +186,8 @@ var TodoFilter = React.createClass({
 var TodoClear = React.createClass({
   render: function() {
     return(
-      <div class="col-xs-12 col-sm-4 text-center">
-        <a class="clear">clear</a>
+      <div className="col-xs-12 col-sm-4 text-center">
+        <a className="clear">clear</a>
       </div>
     );
   }

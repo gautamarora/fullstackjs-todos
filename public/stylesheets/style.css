@@ -9,6 +9,8 @@ body {
       text-decoration: underline; }
   body ul {
     list-style-type: none; }
+    body ul input[type="checkbox"] {
+      margin-right: 4px; }
     body ul .checked {
       text-decoration: line-through; }
   body .todos {

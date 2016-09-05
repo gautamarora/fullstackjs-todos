@@ -13,6 +13,9 @@ body {
   }
   ul {
     list-style-type: none;
+    input[type="checkbox"] {
+      margin-right: 4px;
+    }
     .checked {
       text-decoration: line-through;
     }
