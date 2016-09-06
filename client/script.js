@@ -51,8 +51,8 @@ var TodoApp = React.createClass({
         var _data = this.state.data;
         $.each(_data, function() {
           if(this._id === id) {
-            this.done = data.done ? data.done : this.done;
-            this.text = data.text ? data.text : this.text;
+            this.done = 'done' in data ? data.done : this.done;
+            this.text = 'text' in data ? data.text : this.text;
           }
         });
         this.setState({data: _data});
