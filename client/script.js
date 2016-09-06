@@ -34,7 +34,9 @@ var TodoApp = React.createClass({
         var _data = this.state.data;
         _data.push({_id: todo._id, text: todo.text, done: todo.done});
         this.setState({data: _data});
-        cb();
+        if(typeof cb === "function") {
+          cb();
+        }
       }.bind(this)
     });
   },
@@ -53,7 +55,9 @@ var TodoApp = React.createClass({
           }
         });
         this.setState({data: _data});
-        cb();
+        if(typeof cb === "function") {
+          cb();
+        }
       }.bind(this)
     });
   },
@@ -66,7 +70,9 @@ var TodoApp = React.createClass({
           return d._id !== id;
         })
         this.setState({data: _data});
-        cb();
+        if(typeof cb === "function") {
+          cb();
+        }
       }.bind(this)
     })
   },
@@ -76,7 +82,7 @@ var TodoApp = React.createClass({
         <TodoAdd addTodo={this.addTodo} />
         <TodoList updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} data={this.state.data} />
         <div className="row">
-          <TodoCounter />
+          <TodoCounter data={this.state.data} />
           <TodoFilter />
           <TodoClear />
         </div>
@@ -176,7 +182,7 @@ var TodoCounter = React.createClass({
   render: function() {
     return(
       <div className="col-xs-12 col-sm-4 text-center">
-        <span className="count">3</span> todos
+        <span className="count">{this.props.data.length}</span> todos
       </div>
     );
   }
