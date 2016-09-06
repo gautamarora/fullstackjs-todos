@@ -69,7 +69,7 @@ var TodoApp = React.createClass({
       success: function(todo) {
         var _data = $.grep(this.state.data, function(d) {
           return d._id !== id;
-        })
+        });
         this.setState({data: _data});
         if(typeof cb === "function") {
           cb();
@@ -84,11 +84,11 @@ var TodoApp = React.createClass({
     return(
       <div className="well todos">
         <TodoAdd addTodo={this.addTodo} />
-        <TodoList updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} data={this.state.data} show={this.state.show} />
+        <TodoList data={this.state.data} show={this.state.show} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
         <div className="row">
           <TodoCounter data={this.state.data} />
           <TodoFilter show={this.state.show} updateShow={this.updateShow} />
-          <TodoClear />
+          <TodoClear data={this.state.data} deleteTodo={this.deleteTodo} />
         </div>
       </div>
     );
@@ -226,10 +226,18 @@ var TodoFilter = React.createClass({
 });
 
 var TodoClear = React.createClass({
+  onClearClick: function() {
+    var todosDone = $.grep(this.props.data, function(d) {
+      return d.done === true;
+    });
+    for(var i=0; i < todosDone.length; i++) {
+      this.props.deleteTodo(todosDone[i]._id);
+    }
+  },
   render: function() {
     return(
       <div className="col-xs-12 col-sm-4 text-center">
-        <a className="clear">clear</a>
+        <a className="clear" onClick={this.onClearClick}>clear</a>
       </div>
     );
   }
