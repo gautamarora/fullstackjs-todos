@@ -5,7 +5,8 @@ var $ = require('jquery');
 var TodoApp = React.createClass({
   getInitialState: function() {
     return {
-      data: []
+      data: [],
+      show: 'all'
     }
   },
   componentDidMount: function() {
@@ -76,14 +77,17 @@ var TodoApp = React.createClass({
       }.bind(this)
     })
   },
+  updateShow: function(show) {
+    this.setState({show: show});
+  },
   render: function() {
     return(
       <div className="well todos">
         <TodoAdd addTodo={this.addTodo} />
-        <TodoList updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} data={this.state.data} />
+        <TodoList updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} data={this.state.data} show={this.state.show} />
         <div className="row">
           <TodoCounter data={this.state.data} />
-          <TodoFilter />
+          <TodoFilter show={this.state.show} updateShow={this.updateShow} />
           <TodoClear />
         </div>
       </div>
@@ -128,9 +132,21 @@ var TodoList = React.createClass({
   render: function() {
       var self = this;
       var todos = this.props.data.map(function(todo) {
-        return (
-          <Todo updateTodo={self.props.updateTodo} deleteTodo={self.props.deleteTodo} key={todo._id} id={todo._id} done={todo.done}>{todo.text}</Todo>
-        );
+        var showTodo = false;
+        if(self.props.show === 'all') {
+          showTodo = true;
+        } else if(self.props.show === 'done' && todo.done) {
+          showTodo = true;
+        } else if(self.props.show === 'not-done' && !todo.done) {
+          showTodo = true
+        };
+        if(showTodo) {
+          return (
+            <Todo key={todo._id} id={todo._id} done={todo.done} updateTodo={self.props.updateTodo} deleteTodo={self.props.deleteTodo}>{todo.text}</Todo>
+          );
+        } else {
+          return null;
+        }
       });
       return (
         <ul className="list-group">
@@ -189,12 +205,21 @@ var TodoCounter = React.createClass({
 });
 
 var TodoFilter = React.createClass({
+  onFilterClickAll: function() {
+    this.props.updateShow('all');
+  },
+  onFilterClickDone: function() {
+    this.props.updateShow('done');
+  },
+  onFilterClickNotDone: function() {
+    this.props.updateShow('not-done')
+  },
   render: function() {
     return(
       <div className="col-xs-12 col-sm-4 text-center filter">
-          <a className="show-all">all</a> | 
-          <a className="show-not-done"> not done</a> | 
-          <a className="show-done"> done</a>
+          <a className="show-all" onClick={this.onFilterClickAll} >all</a> | 
+          <a className="show-not-done" onClick={this.onFilterClickNotDone} > not done</a> | 
+          <a className="show-done" onClick={this.onFilterClickDone}> done</a>
       </div>
     );
   }
