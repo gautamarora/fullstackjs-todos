@@ -171,7 +171,7 @@ var Todo = React.createClass({
     return(
       <li id={this.props.id} className="list-group-item">
         <input type="checkbox" defaultChecked={this.props.done} onClick={this.onCheckboxClick}/>
-        <span ref={"todoText-"+this.props.id} contentEditable={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
+        <span ref={"todoText-"+this.props.id} contentEditable={true} suppressContentEditableWarning={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
         <a className="pull-right" onClick={this.onDeleteClick}><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );
