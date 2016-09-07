@@ -45,20 +45,26 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
-  updateTodo: function(id, data, cb) {
+  updateTodo: function(id, type, cb) {
+    var _data = this.state.data;
+    var _dataTodo = {};
+    $.each(_data, function() {
+      if(this._id === id) {
+        if(type === 'done') {
+          this.done = !this.done;
+          _dataTodo.done = this.done;
+        }
+        if(type === 'text') {
+          //TODO
+        }
+      }
+    });
     $.ajax({
       url: '/api/todos/'+id,
       type: 'PUT',
-      data: data,
+      data: _dataTodo,
       dataType: 'json',
       success: function(todo) {
-        var _data = this.state.data;
-        $.each(_data, function() {
-          if(this._id === id) {
-            this.done = 'done' in data ? data.done : this.done;
-            this.text = 'text' in data ? data.text : this.text;
-          }
-        });
         this.setState({data: _data});
         if(typeof cb === "function") {
           cb();
@@ -154,10 +160,7 @@ var TodoList = React.createClass({
 
 var Todo = React.createClass({
   onCheckboxClick: function(e) {
-    var id = this.props.id,
-        checked = !this.props.done,
-        data = {done: checked};
-    this.props.updateTodo(id, data);
+    this.props.updateTodo(this.props.id, 'done');
   },
   onTextFieldKeyDown: function(e) {
     var key = e.keyCode, //note: For keydown (when detecting escape), use key code. For keypress, use char code.
@@ -182,7 +185,7 @@ var Todo = React.createClass({
   render: function() {
     return(
       <li id={this.props.id} className="list-group-item">
-        <input type="checkbox" defaultChecked={this.props.done} onClick={this.onCheckboxClick}/>
+        <input type="checkbox" checked={!!this.props.done} onChange={this.onCheckboxClick}/>
         <span ref={"todoText-"+this.props.id} contentEditable={true} suppressContentEditableWarning={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
         <a className="pull-right" onClick={this.onDeleteClick}><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
