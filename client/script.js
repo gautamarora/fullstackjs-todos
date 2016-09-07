@@ -101,7 +101,7 @@ var TodoApp = React.createClass({
 
 var TodoAdd = React.createClass({
   onButtonClick: function(e) {
-    this.addTodo();
+    this.props.addTodo();
   },
   onChange: function(e) {
     this.props.addTodoChange(e);
