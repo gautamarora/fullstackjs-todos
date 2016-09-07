@@ -6,7 +6,8 @@ var TodoApp = React.createClass({
   getInitialState: function() {
     return {
       data: [],
-      show: 'all'
+      show: 'all',
+      addTodoText: ''
     }
   },
   componentDidMount: function() {
@@ -22,19 +23,22 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
+  addTodoChange: function(e) {
+    this.setState({addTodoText: e.target.value});
+  },
   addTodo: function(text, cb) {
     $.ajax({
       url: '/api/todos',
       type: 'POST',
       data: {
-        text: text
+        text: this.state.addTodoText
       },
       dataType: 'json',
       success: function(data) {
         var todo = data.todo;
         var _data = this.state.data;
         _data.push({_id: todo._id, text: todo.text, done: todo.done});
-        this.setState({data: _data});
+        this.setState({data: _data, addTodoText: ''});
         if(typeof cb === "function") {
           cb();
         }
@@ -83,7 +87,7 @@ var TodoApp = React.createClass({
   render: function() {
     return(
       <div className="well todos">
-        <TodoAdd addTodo={this.addTodo} />
+        <TodoAdd addTodoText={this.state.addTodoText} addTodo={this.addTodo} addTodoChange={this.addTodoChange} />
         <TodoList data={this.state.data} show={this.state.show} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
         <div className="row">
           <TodoCounter data={this.state.data} />
@@ -99,26 +103,18 @@ var TodoAdd = React.createClass({
   onButtonClick: function(e) {
     this.addTodo();
   },
-  onTextFieldKeypress: function(e) {
-    var key = e.charCode;
-    if(key === 13 || key === 169) {
-      this.addTodo();
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
+  onChange: function(e) {
+    this.props.addTodoChange(e);
   },
-  addTodo: function() {
-    var text = this.refs.addTodoText.value;
-    this.props.addTodo(text, function() {
-      this.refs.addTodoText.value = '';
-    }.bind(this));
+  onSubmit: function(e) {
+    this.props.addTodo();
+    e.preventDefault();
   },
   render: function() {
     return(
-      <form action="#" method="post">
+      <form onSubmit={this.onSubmit} >
         <div className="form-group input-group">
-          <input ref="addTodoText" id="add-todo-text" className="form-control" type="text" defaultValue="" placeholder="Add a Todo" onKeyPress={this.onTextFieldKeypress} />
+          <input id="add-todo-text" className="form-control" type="text" value={this.props.addTodoText} placeholder="Add a Todo" onChange={this.onChange} />
           <span className="input-group-btn">
             <input className="btn btn-default" type="button" value="add" onClick={this.onButtonClick} />
           </span>
