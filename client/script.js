@@ -1,13 +1,15 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var $ = require('jquery');
+var ContentEditable = require('react-contenteditable');
 
 var TodoApp = React.createClass({
   getInitialState: function() {
     return {
       data: [],
       show: 'all',
-      addTodoText: ''
+      addTodoText: '',
+      beforeEditingTodoText: ''
     }
   },
   componentDidMount: function() {
@@ -45,9 +47,41 @@ var TodoApp = React.createClass({
       }.bind(this)
     });
   },
-  updateTodo: function(id, type, cb) {
+  //fired to revert on escape
+  updateTodoChangeRevert: function(id, type, e) {
+    var self = this;
+    var _data = this.state.data;
+    $.each(_data, function() {
+      if(this._id === id) {
+        if(type === 'text') {
+          this.text = self.state.beforeEditingTodoText;
+          self.setState({beforeEditingTodoText: ''});
+        }
+      }
+    });
+    this.setState({data: _data});
+  },
+  //fired on text field edits
+  updateTodoChange: function(id, type, e) {
+    var self = this;
+    var _data = this.state.data;
+    $.each(_data, function() {
+      if(this._id === id) {
+        if(type === 'text') {
+          if(self.state.beforeEditingTodoText === '') {
+            self.setState({beforeEditingTodoText: this.text});
+          }
+          this.text = e.target.value;
+        }
+      }
+    });
+    this.setState({data: _data});
+  },
+  //fired on saves
+  updateTodo: function(id, type, e, cb) {
     var _data = this.state.data;
     var _dataTodo = {};
+    var self = this;
     $.each(_data, function() {
       if(this._id === id) {
         if(type === 'done') {
@@ -55,7 +89,8 @@ var TodoApp = React.createClass({
           _dataTodo.done = this.done;
         }
         if(type === 'text') {
-          //TODO
+          _dataTodo.text = this.text;
+          self.setState({beforeEditingTodoText: ''});
         }
       }
     });
@@ -94,7 +129,7 @@ var TodoApp = React.createClass({
     return(
       <div className="well todos">
         <TodoAdd addTodoText={this.state.addTodoText} addTodo={this.addTodo} addTodoChange={this.addTodoChange} />
-        <TodoList data={this.state.data} show={this.state.show} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
+        <TodoList data={this.state.data} show={this.state.show} updateTodoChange={this.updateTodoChange} updateTodoChangeRevert={this.updateTodoChangeRevert} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
         <div className="row">
           <TodoCounter data={this.state.data} />
           <TodoFilter show={this.state.show} updateShow={this.updateShow} />
@@ -144,7 +179,7 @@ var TodoList = React.createClass({
         };
         if(showTodo) {
           return (
-            <Todo key={todo._id} id={todo._id} done={todo.done} updateTodo={self.props.updateTodo} deleteTodo={self.props.deleteTodo}>{todo.text}</Todo>
+            <Todo key={todo._id} id={todo._id} done={todo.done} updateTodoChange={self.props.updateTodoChange} updateTodoChangeRevert={self.props.updateTodoChangeRevert} updateTodo={self.props.updateTodo} deleteTodo={self.props.deleteTodo}>{todo.text}</Todo>
           );
         } else {
           return null;
@@ -162,21 +197,21 @@ var Todo = React.createClass({
   onCheckboxClick: function(e) {
     this.props.updateTodo(this.props.id, 'done');
   },
-  onTextFieldKeyDown: function(e) {
-    var key = e.keyCode, //note: For keydown (when detecting escape), use key code. For keypress, use char code.
-        target = e.target,
-        id = this.props.id,
-        text = this.refs["todoText-"+id].innerHTML, //note: for text fields, use innerHTML. For input text fields, use value.
-        data = { text: text };
-    if(key === 27) {
-      document.execCommand('undo');
-      target.blur();
-    } else if(key === 13) {
-      this.props.updateTodo(id, data, function() {
-        target.blur();
-      });
+  onKeyDown: function(e) {
+    var key = e.keyCode;
+    if(key === 13) {
+      this.props.updateTodo(this.props.id, 'text', e);
+      e.target.blur();
       e.preventDefault();
+    } else if(key === 27) {
+      this.props.updateTodoChangeRevert(this.props.id, 'text', e);
+      e.target.blur();
+      //note: onKeyDown for escape will not trigger on change, so e.preventDefault() is not needed here
+      //however, it would have been fired for onKeyPress but that doesnt capture escapes, and only characters
     }
+  },
+  onChange: function(e) {
+    this.props.updateTodoChange(this.props.id, 'text', e);
   },
   onDeleteClick: function(e) {
     var id = this.props.id;
@@ -186,7 +221,7 @@ var Todo = React.createClass({
     return(
       <li id={this.props.id} className="list-group-item">
         <input type="checkbox" checked={!!this.props.done} onChange={this.onCheckboxClick}/>
-        <span ref={"todoText-"+this.props.id} contentEditable={true} suppressContentEditableWarning={true} className={this.props.done ? "checked" : ""} onKeyDown={this.onTextFieldKeyDown}>{this.props.children}</span>
+        <ContentEditable tagName="span" html={this.props.children} className={!!this.props.done ? "checked" : ""} onChange={this.onChange} onKeyDown={this.onKeyDown} />
         <a className="pull-right" onClick={this.onDeleteClick}><small><i className="glyphicon glyphicon-trash"></i></small></a>
       </li>
     );

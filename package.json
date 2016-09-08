@@ -25,6 +25,7 @@
     "morgan": "~1.3.0",
     "node-sass-middleware": "^0.9.8",
     "react": "^15.1.0",
+    "react-contenteditable": "git+https://github.com/gautamarora/react-contenteditable.git",
     "react-dom": "^15.1.0",
     "serve-favicon": "~2.1.3"
   },
