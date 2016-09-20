@@ -5,7 +5,7 @@ var Todo = require('../../models/todos');
 
 router.route('/')
   .get(function(req, res, next) {
-    Todo.findAsync({},null,{sort: {"_id":1}})
+    Todo.findAsync({user: req.user._id},null,{sort: {"_id":1}})
     .then(function(todos) {
       res.json(todos);
     })
@@ -14,6 +14,7 @@ router.route('/')
   })
   .post(function(req, res, next) {
     var todo = new Todo();
+    todo.user = req.user._id;
     todo.text = req.body.text;
     todo.saveAsync()
     .then(function(todo) {
@@ -29,7 +30,7 @@ router.route('/')
 
 router.route('/:id')
   .get(function(req, res, next) {
-    Todo.findOneAsync({_id: req.params.id}, {text: 1, done: 1})
+    Todo.findOneAsync({_id: req.params.id, user: req.user._id}, {text: 1, done: 1})
     .then(function(todo) {
       res.json(todo);
     })
@@ -42,7 +43,7 @@ router.route('/:id')
     for (prop in req.body) {
       todo[prop] = req.body[prop];
     }
-    Todo.updateAsync({_id: req.params.id}, todo)
+    Todo.updateAsync({_id: req.params.id, user: req.user._id}, todo)
     .then(function(updatedTodo) {
       return res.json({'status': 'success', 'todo': updatedTodo});
     })
@@ -51,7 +52,7 @@ router.route('/:id')
     });
   })
   .delete(function(req, res, next) {
-    Todo.findByIdAndRemoveAsync(req.params.id)
+    Todo.findAndRemoveAsync({_id: req.params.id, user: req.user._id})
     .then(function(deletedTodo) {
       res.json({'status': 'success', 'todo': deletedTodo});
     })

@@ -6,22 +6,103 @@ var ContentEditable = require('react-contenteditable');
 var TodoApp = React.createClass({
   getInitialState: function() {
     return {
+      title: '',
+      user: null,
+      page: 'index', // index or login or register or todos
       data: [],
-      show: 'all',
+      show: 'all', // all or done or not-done
       addTodoText: '',
-      beforeEditingTodoText: ''
+      beforeEditingTodoText: '',
+      username: '',
+      password: '',
     }
   },
   componentDidMount: function() {
+    var initialState = JSON.parse(window.INITIAL_STATE || {});
+    this.setState({title: initialState.title, user: initialState.user});
+    if(initialState.user) {
+      $.ajax({
+        url: this.props.url,
+        dataType: 'json',
+        cache: false,
+        success: function(data) {
+          this.setState({data: data});
+        }.bind(this),
+        error: function(xhr, status, err) {
+          console.error(this.props.url, status, err.toString());
+        }.bind(this)
+      });
+    }
+  },
+  loginClick: function(e) {
+    this.setState({page: 'login'});
+  },
+  registerClick: function(e) {
+    this.setState({page: 'register'});
+  },
+  todosClick: function(e) {
+    this.setState({page: 'todos'})
+  },
+  usernameChange: function(e) {
+    this.setState({username: e.target.value});
+  },
+  passwordChange: function(e) {
+    this.setState({password: e.target.value});
+  },
+  logout: function(e) {
     $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      cache: false,
+      url: '/logout',
+      type: 'GET',
       success: function(data) {
-        this.setState({data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
+        this.setState({user: null, page: 'index'});
+        if(typeof cb === "function") {
+          cb();
+        }
+      }.bind(this)
+    });
+  },
+  login: function(e) {
+    $.ajax({
+      url: '/login',
+      type: 'POST',
+      data: {
+        username: this.state.username,
+        password: this.state.password
+      },
+      dataType: 'json',
+      success: function(data) {
+        this.setState({user: data.user});
+        $.ajax({ //DUPLICATE: Fetching Todos on ComponenentDidMount (already logged in), and Login Success (just logged in)
+          url: this.props.url,
+          dataType: 'json',
+          cache: false,
+          success: function(data) {
+            this.setState({data: data});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
+        if(typeof cb === "function") {
+          cb();
+        }
+      }.bind(this)
+    });
+  },
+  register: function(e) {
+    $.ajax({
+      url: '/register',
+      type: 'POST',
+      data: {
+        username: this.state.username,
+        password: this.state.password
+      },
+      dataType: 'json',
+      success: function(data) {
+        this.setState({user: data.user});
+        if(typeof cb === "function") {
+          cb();
+        }
       }.bind(this)
     });
   },
@@ -126,15 +207,114 @@ var TodoApp = React.createClass({
     this.setState({show: show});
   },
   render: function() {
-    return(
-      <div className="well todos">
-        <TodoAdd addTodoText={this.state.addTodoText} addTodo={this.addTodo} addTodoChange={this.addTodoChange} />
-        <TodoList data={this.state.data} show={this.state.show} updateTodoChange={this.updateTodoChange} updateTodoChangeRevert={this.updateTodoChangeRevert} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
-        <div className="row">
-          <TodoCounter data={this.state.data} />
-          <TodoFilter show={this.state.show} updateShow={this.updateShow} />
-          <TodoClear data={this.state.data} deleteTodo={this.deleteTodo} />
+    if(!this.state.user && this.state.page === 'register') {
+      return (
+        <Register register={this.register} usernameChange={this.usernameChange} passwordChange={this.passwordChange} />      
+      );
+    } else if(!this.state.user && this.state.page === 'login') {
+      return (
+        <Login login={this.login} usernameChange={this.usernameChange} passwordChange={this.passwordChange} />
+      );
+    } else if(this.state.user && this.state.page === 'todos') {
+      return(
+        <div className="well todos">
+          <TodoAdd addTodoText={this.state.addTodoText} addTodo={this.addTodo} addTodoChange={this.addTodoChange} />
+          <TodoList data={this.state.data} show={this.state.show} updateTodoChange={this.updateTodoChange} updateTodoChangeRevert={this.updateTodoChangeRevert} updateTodo={this.updateTodo} deleteTodo={this.deleteTodo} />
+          <div className="row">
+            <TodoCounter data={this.state.data} />
+            <TodoFilter show={this.state.show} updateShow={this.updateShow} />
+            <TodoClear data={this.state.data} deleteTodo={this.deleteTodo} />
+          </div>
         </div>
+      );
+    } else {
+      return(
+        <Index title={this.state.title} user={this.state.user} loginClick={this.loginClick} logoutClick={this.logout} registerClick={this.registerClick} todosClick={this.todosClick} />
+      );
+    }
+  }
+});
+
+var Index = React.createClass({
+  onLoginClick: function(e) {
+    this.props.loginClick();
+  },
+  onRegisterClick: function(e) {
+    this.props.registerClick();
+  },
+  onLogoutClick: function(e) {
+    this.props.logoutClick();
+  },
+  onTodosClick: function(e) {
+    this.props.todosClick();
+  },
+  render: function() {
+    return (
+      <div className="container">
+        <div className="well todos">
+            {this.props.user && <h4>Welcome {this.props.user.username}!</h4> }
+            {!this.props.user && <h4>Welcome to the {this.props.title} app!</h4> }
+            <div>
+              {this.props.user && <button className="btn btn-md btn-success btn-todos" type="submit" onClick={this.onTodosClick}>Todos</button> }
+              {this.props.user && <button className="btn btn-md btn-danger btn-logout" type="submit" onClick={this.onLogoutClick}>Log Out</button> }
+              {!this.props.user && <button className="btn btn-md btn-success btn-login" type="submit" onClick={this.onLoginClick}>Log In</button> }
+              {!this.props.user && <button className="btn btn-md btn-primary btn-register" type="submit" onClick={this.onRegisterClick}>Register</button> }
+            </div>
+        </div>
+      </div>
+    );
+  }
+});
+
+var Login = React.createClass({
+  onUsernameChange: function(e) {
+    this.props.usernameChange(e);
+  },
+  onPasswordChange: function(e) {
+    this.props.passwordChange(e);
+  },
+  onSubmit: function(e) {
+    this.props.login();
+    e.preventDefault();
+  },
+  render: function() {
+    return (
+      <div className="container">
+        <form className="form-signin" onSubmit={this.onSubmit}>
+          <h2 className="form-signin-heading">Sign in</h2>
+          <label htmlFor="inputUsername" className="sr-only">Email address</label>
+          <input type="username" name="username" id="inputUsername" className="form-control" value={this.props.username} placeholder="Username" required autoFocus onChange={this.onUsernameChange} />
+          <label htmlFor="inputPassword" className="sr-only">Password</label>
+          <input type="password" name="password" id="inputPassword" className="form-control" value={this.props.password} placeholder="Password" required onChange={this.onPasswordChange} />
+          <button className="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        </form>
+      </div>
+    );
+  }
+});
+
+var Register = React.createClass({
+  onUsernameChange: function(e) {
+    this.props.usernameChange(e);
+  },
+  onPasswordChange: function(e) {
+    this.props.passwordChange(e);
+  },
+  onSubmit: function(e) {
+    this.props.register();
+    e.preventDefault();
+  },
+  render: function() {
+    return (
+      <div className="container">
+        <form className="form-signin" onSubmit={this.onSubmit}>
+          <h2 className="form-signin-heading">Register</h2>
+          <label htmlFor="inputUsername" className="sr-only">Email address</label>
+          <input type="username" name="username" id="inputUsername" className="form-control" placeholder="Username" required autoFocus onChange={this.onUsernameChange} />
+          <label htmlFor="inputPassword" className="sr-only">Password</label>
+          <input type="password" name="password" id="inputPassword" className="form-control" placeholder="Password" required onChange={this.onPasswordChange} />
+          <button className="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+        </form>
       </div>
     );
   }

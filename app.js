@@ -1,13 +1,19 @@
 var express = require('express');
 var expreact = require('express-react-views');
+var mongoose = require('mongoose');
 var sassMiddleware = require('node-sass-middleware');
 var browserify = require('browserify-middleware');
 
+var passport = require('passport');
+var flash    = require('connect-flash');
+var LocalStrategy = require('passport-local').Strategy;
+ 
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session      = require('express-session');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -37,8 +43,14 @@ browserify.settings({
 });
 app.get('/javascripts/bundle.js', browserify('./client/script.js'));
 
+
+//passport setup
+var User = require('./models/users');
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+ 
 //mongo setup
-var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/todos');
  
 //browser sync setup
@@ -61,7 +73,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({ secret: 'todos-secret', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/fonts', express.static(path.join(__dirname, 'node_modules/bootstrap-sass/assets/fonts')));
 
 app.use('/', routes);
 app.use('/users', users);

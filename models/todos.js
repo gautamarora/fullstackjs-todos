@@ -4,6 +4,7 @@ var Promise = require('bluebird');
 Promise.promisifyAll(mongoose);
 
 var TodoSchema = new Schema({
+  user : { ref: 'User', type: Schema.ObjectId },
   text: {type: 'String', required: true},
   done: {type: 'Boolean'}
 });

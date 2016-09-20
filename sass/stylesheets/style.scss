@@ -1,3 +1,5 @@
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
 $font-stack: "Lucida Grande", Helvetica, Arial, sans-serif;
 $primary-link-color: #00B7FF;
 body {
@@ -31,6 +33,11 @@ body {
   .hide {
     display: none;
   }
+  
+  .btn-register,
+  .btn-logout {
+    margin-left: 10px
+  }
 
   .navbar-default {
     background-image: none;
@@ -48,6 +55,42 @@ body {
         cursor: default;
         color: #ecf0f1;
       }
+    }
+  }
+  
+  //login/register form
+  .form-signin {
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+    .form-signin-heading,
+    .checkbox {
+      margin-bottom: 10px;
+    }
+    .checkbox {
+      font-weight: normal;
+    }
+    .form-control {
+      position: relative;
+      height: auto;
+      -webkit-box-sizing: border-box;
+         -moz-box-sizing: border-box;
+              box-sizing: border-box;
+      padding: 10px;
+      font-size: 16px;
+      &:focus {
+        z-index: 2;
+      }
+    }
+    input[type="email"] {
+      margin-bottom: -1px;
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    input[type="password"] {
+      margin-bottom: 10px;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
     }
   }
 }
